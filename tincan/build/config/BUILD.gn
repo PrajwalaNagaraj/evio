@@ -358,6 +358,10 @@ config("compiler") {
   }
 
   if (is_linux && is_clang) {
+<<<<<<< HEAD
+=======
+   if (target_cpu == "x64"){
+>>>>>>> addressing PR comment
     defines += [
       # "USE_GLIB=1",
       # "USE_NSS_CERTS=1",
