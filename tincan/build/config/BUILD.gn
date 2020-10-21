@@ -359,9 +359,12 @@ config("compiler") {
 
   if (is_linux && is_clang) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
    if (target_cpu == "x64"){
 >>>>>>> addressing PR comment
+=======
+>>>>>>> update on target_cpu ordering and is_clang set to true
     defines += [
       # "USE_GLIB=1",
       # "USE_NSS_CERTS=1",
