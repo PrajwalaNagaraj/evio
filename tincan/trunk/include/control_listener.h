@@ -34,6 +34,7 @@
 #include "controller_handle.h"
 #include "control_dispatch.h"
 #include "tap_frame.h"
+#include "async_domain_socket.h"
 
 namespace tincan
 {
@@ -48,11 +49,8 @@ public:
   ControlListener(unique_ptr<ControlDispatch> control_dispatch);
   ~ControlListener() override;
   void ReadPacketHandler(
-    AsyncPacketSocket * socket,
     const char * data,
-    size_t len,
-    const SocketAddress & remote_addr,
-    const int64_t& ptime);
+    size_t len);
 
   void Deliver(
     TincanControl & ctrl_resp) override;
@@ -65,7 +63,7 @@ public:
     ) override;
   ControllerLink & GetControllerLink() override;
 
-  std::unique_ptr<Thread> ctrl_thread_;
+  //std::unique_ptr<Thread> ctrl_thread_;
   //thread to keep UDP socket listening run from tincan.cc
   void Quit();
   void Run();
@@ -75,6 +73,7 @@ private:
   unique_ptr<AsyncPacketSocket> rcv_socket_; //Listener for incoming Controls
   unique_ptr<AsyncUDPSocket> snd_socket_;    //Sends to Listener Controller Module
   unique_ptr<SocketAddress> ctrl_addr_;      //Address for Listener Controller Module
+  unique_ptr<AsyncDomainSocket> ads_;
   PacketOptions packet_options_;
   std::mutex skt_mutex_;
 };

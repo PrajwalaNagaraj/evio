@@ -40,7 +40,9 @@
 #include <sstream>
 #include <stack>
 #include <string>
+#include <thread>
 #include <utility>
+#include <unistd.h>
 #include <unordered_map>
 #include <vector>
 #include "tincan_version.h"

@@ -12,6 +12,7 @@ executable("tincan") {
             "trunk/src/basic_tunnel.cc",
             "trunk/src/tunnel_threads.cc",
             "trunk/src/async_io.cc",
+            "trunk/src/async_domain_socket.cc",
         ]
         include_dirs = [
             "trunk/include",

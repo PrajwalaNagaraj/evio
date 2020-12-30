@@ -30,7 +30,7 @@ ControlListener::ControlListener(unique_ptr<ControlDispatch> control_dispatch):
   ctrl_dispatch_(move(control_dispatch)),
   packet_options_(DSCP_DEFAULT)
 {
-  ctrl_thread_ = Thread::CreateWithSocketServer();
+//  ctrl_thread_ = Thread::CreateWithSocketServer();
   ctrl_dispatch_->SetDispatchToListenerInf(this);
 }
 
@@ -39,11 +39,8 @@ ControlListener::~ControlListener()
 
 void
 ControlListener::ReadPacketHandler(
-  AsyncPacketSocket *,
   const char * data,
-  size_t len,
-  const SocketAddress &,
-  const int64_t& PacketTime)
+  size_t len)
 {
   try {
     TincanControl ctrl(data, len);
@@ -65,7 +62,8 @@ ControlListener::Deliver(
   std::string msg = ctrl_resp.StyledString();
   RTC_LOG(LS_INFO) << "Sending CONTROL: " << msg;
   lock_guard<mutex> lg(skt_mutex_);
-  snd_socket_->SendTo(msg.c_str(), msg.length(), *ctrl_addr_, packet_options_);
+  //TODO: Implement send from async_domain_socket
+  //ads_->SendTo(msg.c_str(), msg.length(), *ctrl_addr_, packet_options_);
 }
 void
 ControlListener::Deliver(
@@ -95,7 +93,7 @@ ControlListener::GetControllerLink()
 void
 ControlListener::Run()
 {
- const SocketAddress addr(tp.kLocalHost, tp.kUdpPort);
+/* const SocketAddress addr(tp.kLocalHost, tp.kUdpPort);
   SocketServer* sf = ctrl_thread_->socketserver();
   if(!sf)
     throw TCEXCEPT("Error: No ctrl_thread socket server available");
@@ -107,12 +105,25 @@ ControlListener::Run()
     throw TCEXCEPT("Failed to create control listener socket");
   RTC_LOG(LS_INFO) << "Tincan listening on " << tp.kLocalHost << " UDP port " << tp.kUdpPort;
   rcv_socket_->SignalReadPacket.connect(this, &ControlListener::ReadPacketHandler);
-  ctrl_thread_->Start();
+  ctrl_thread_->Start();*/
+  //The below constructor creates a async domain socket and starts listening on the pathname specified in unixDomainSocket class
+  ads_ = make_unique<AsyncDomainSocket>(AsyncDomainSocket::SOCKET_PATH_NAME);
+  ads_->SignalRecv.connect(this, &ControlListener::ReadPacketHandler);
+  //Instantiates a new thread on which client request is managed, data is received and SignalRecv is called
+  ads_->StartSocketFunction();
+  //std::thread ctrl_thread_(&AsyncDomainSocket::startSocketFunction, &sf);
+  //ctrl_thread_.join();
 }
 
 void
 ControlListener::Quit()
 {
-  ctrl_thread_->Quit();
+  //lock_guard<mutex> lg(uskt_mutex_);
+  //skt_stop_ = true;
+  //skt_cond_.notify_one();
+  //ctrl_thread_->Stop();
+  //Calls the respective exit mechanism on instantiated thread from StartSocketFunction
+  ads_->Quit();
 }
 }  // namespace tincan
+
