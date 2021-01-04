@@ -47,18 +47,20 @@ public:
 private:
 
   int Create(const char* socket_filename);
-  int Listen(int fd_);
-  int Accept(); //Return epoll_fd_ created from epoll_ctl
+  int Listen(int fd);
+  int Accept(); //Return client_fd_ connected
   void Close();
   int Receive(int client_fd_, char* buf);
   int Send(int client_fd_, char* buf);
   void SocketRun(); //Function that starts executing as std:thread is instantiated
+  int AddClientToEpoll(int cfd);
+  int RemoveClientFromEpoll(int cfd);
+  bool EpollWaitFor();
 
   int socket_fd_, client_fd_, epoll_fd_;
-  struct epoll_event event, events[5];
+  struct epoll_event event, events[0x100];
+  int event_count; //Return from epoll_wait
   struct sockaddr_un bind_addr_;
-  std::mutex uskt_mutex_; //mutex used to lock and synchronize conditional variable for exit condition
-  std::condition_variable skt_cond_; //Conditional variable to notify the exit condition with Quit() from ctrl_listener
   bool skt_stop_ = false; //condition used to exit startSocketFunction
   std::thread skt_thread_; //thread on which async_socket_server accepts client connection and receives data
 
